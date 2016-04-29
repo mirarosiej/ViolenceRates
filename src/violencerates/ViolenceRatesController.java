@@ -5,12 +5,14 @@
  */
 package violencerates;
 
+import com.google.gson.Gson;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Scanner;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 
@@ -23,7 +25,10 @@ public class ViolenceRatesController implements Initializable {
     @FXML
     private Label label;
     
-     private Dataset data;
+    private Dataset data;
+    
+    @FXML
+    private BarChart<String, Integer> bar;
     
     @FXML
     private void handleButtonAction(ActionEvent event) {
@@ -33,6 +38,7 @@ public class ViolenceRatesController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+       System.out.println("Initializing");
        String s = "http://apps.who.int/gho/athena/data/GHO/RHR_IPV.json?profile=simple&filter=COUNTRY:-;WHOINCOMEREGION:*";
        URL myUrl = null;
         try {
@@ -59,13 +65,18 @@ public class ViolenceRatesController implements Initializable {
 
         Gson gson = new Gson();
         data = gson.fromJson(str, Dataset.class);
-        System.out.println(data.toString());
+        //System.out.println(data.toString());
 
-        XYChart.Series< String, Number> Violence = new XYChart.Series();
-        Datapoint[] point= data.getFact(); 
+        XYChart.Series<String, Integer> Violence = new XYChart.Series();
+        Datapoint[] point = data.getFact(); 
+        System.out.println("Length: " + point.length);
         for(Datapoint xyz : point){
+            //System.out.println("point");
             if(xyz.getDim().getWHOINCOMEREGION() != null){
-                Violence.getData().add(new XYChart.Data(xyz.getDim().getWHOINCOMEREGION(), xyz.getValue()));     
+                //System.out.println("Income region: " + xyz.getDim().getWHOINCOMEREGION());
+                Integer val = Integer.parseInt(xyz.getValue().substring(0, 2).trim());
+                System.out.println("Value: " + val);
+                Violence.getData().add(new XYChart.Data(xyz.getDim().getWHOINCOMEREGION(), val));     
         }
         }
         bar.getData().add(Violence);
